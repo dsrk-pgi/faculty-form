@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Subject Reporting Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Faculty Subject Reporting Form</h1>
+        
+        <form id="facultyForm">
+            <div class="form-content">
+                <div class="left-panel">
+                    <div class="faculty-info">
+                        <h2>Faculty Information</h2>
+                        <input type="text" id="facultyName" placeholder="Faculty Name" required>
+                        <input type="email" id="facultyEmail" placeholder="Email" required>
+                        <input type="text" id="facultyId" placeholder="Faculty ID" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="showSummary()">Preview Summary</button>
+                        <button type="submit">Submit Data</button>
+                        <button type="button" onclick="exportData()">Export to Excel</button>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="subjects-section">
+                        <h2>My Assigned Subjects</h2>
+                        <div id="semesterTabs">
+                            <button type="button" class="tab-btn active" onclick="showSemester(1)">Semester 1</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(2)">Semester 2</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(3)">Semester 3</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(4)">Semester 4</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(5)">Semester 5</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(6)">Semester 6</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(7)">Semester 7</button>
+                            <button type="button" class="tab-btn" onclick="showSemester(8)">Semester 8</button>
+                        </div>
+
+                        <div id="semesterContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-section" id="summarySection" style="display:none;">
+                <h2>Summary</h2>
+                <div id="summaryContent"></div>
+            </div>
+        </form>
+    </div>
+
+    <script src="subjects.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

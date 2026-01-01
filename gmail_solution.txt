@@ -1,0 +1,32 @@
+# Gmail + Google Drive Solution
+
+## Steps:
+1. Upload faculty_data_form.zip to Google Drive
+2. Set sharing to "Anyone with link can view"
+3. Share the Google Drive link via Gmail
+4. Users download, extract, and use the form
+5. Users email back their JSON data files
+
+## Gmail Message Template:
+Subject: Faculty Subject Allocation Form
+
+Dear Faculty,
+
+Please fill out the subject allocation form:
+1. Download: [Google Drive Link]
+2. Extract the zip file
+3. Open index.html in your browser
+4. Fill the form and submit
+5. Email back the downloaded JSON file
+
+Thank you!
+
+## Pros:
+- Uses your existing Gmail/Google account
+- Free Google Drive storage (15GB)
+- Easy sharing via email
+- Data collection through email replies
+
+## Cons:
+- Not a direct web link like Google Forms
+- Requires manual download/extract steps
