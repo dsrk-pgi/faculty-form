@@ -112,15 +112,26 @@ function showSummary() {
             });
         
         if (semesterSubjects.length > 0) {
-            summaryHtml += `<h4>Semester ${sem}</h4><table class="summary-table">
-                <tr><th>Subject</th><th>Allotted Hours</th><th>Completed Hours</th><th>Remaining Hours</th><th>Progress</th></tr>`;
+            summaryHtml += `
+                <h4>Semester ${sem}</h4>
+                <table class="summary-table">
+                    <tr>
+                        <th>Subject Code</th>
+                        <th>Subject Title</th>
+                        <th>Allotted Hours</th>
+                        <th>Completed Hours</th>
+                        <th>Remaining Hours</th>
+                        <th>Progress</th>
+                    </tr>
+            `;
             
             semesterSubjects.forEach(subject => {
                 const progress = subject.allottedHours > 0 ? 
                     Math.round((subject.completedHours / subject.allottedHours) * 100) : 0;
                 summaryHtml += `
                     <tr>
-                        <td>${subject.code} - ${subject.title}</td>
+                        <td>${subject.code}</td>
+                        <td>${subject.title}</td>
                         <td>${subject.allottedHours}</td>
                         <td>${subject.completedHours}</td>
                         <td>${subject.allottedHours - subject.completedHours}</td>
@@ -135,6 +146,9 @@ function showSummary() {
     summaryHtml += '</div>';
     document.getElementById('summaryContent').innerHTML = summaryHtml;
     document.getElementById('summarySection').style.display = 'block';
+    
+    // Scroll to summary
+    document.getElementById('summarySection').scrollIntoView({ behavior: 'smooth' });
 }
 
 function exportData() {
