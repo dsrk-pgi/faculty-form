@@ -6,12 +6,17 @@ function showSemester(semester) {
 
     // Update tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event) event.target.classList.add('active');
 
     const content = document.getElementById('semesterContent');
-    const subjects = subjectsData[semester];
+    const subjects = subjectsData[semester] || [];
 
-    let html = `<h3>Semester ${semester} Subjects</h3><div class="subjects-grid">`;
+    // Format header based on type (Semester vs M.Sc.)
+    let headerLabel = isNaN(semester) ? 
+        `M.Sc. ${semester.replace('MSC', '')}${semester.includes('1') ? 'st' : 'nd'} Year` : 
+        `Semester ${semester}`;
+
+    let html = `<h3>${headerLabel} Subjects</h3><div class="subjects-grid">`;
 
     subjects.forEach(subject => {
         const key = `sem${semester}_${subject.code}`;
@@ -19,7 +24,7 @@ function showSemester(semester) {
             allocated: false,
             allottedHours: 0,
             completedHours: 0,
-            asOnDate: new Date().toISOString().split('T')[0] // ✅ NEW
+            asOnDate: new Date().toISOString().split('T')[0]
         };
 
         html += `
@@ -30,8 +35,7 @@ function showSemester(semester) {
                         onchange="toggleSubject('${key}', this.checked)">
                     <label for="${key}_check">
                         <strong>${subject.code}</strong><br>
-                        ${subject.title}<br>
-                        <small>Credits: ${subject.credits} | Total Hours: ${subject.hours}</small>
+                        ${subject.title}
                     </label>
                 </div>
 
@@ -66,7 +70,6 @@ function showSemester(semester) {
                             value="${savedData.allottedHours - savedData.completedHours}"
                             readonly>
                     </div>
-
                 </div>
             </div>
         `;
@@ -84,48 +87,40 @@ function toggleSubject(key, allocated) {
             asOnDate: new Date().toISOString().split('T')[0]
         };
     }
-
     facultyData[key].allocated = allocated;
-
-    const inputs = document.getElementById(`${key}_inputs`);
-    inputs.style.display = allocated ? 'block' : 'none';
+    document.getElementById(`${key}_inputs`).style.display = allocated ? 'block' : 'none';
 }
 
 function updateHours(key, type, value) {
     if (!facultyData[key]) facultyData[key] = {};
     facultyData[key][type] = parseInt(value) || 0;
-
+    
     const allotted = facultyData[key].allottedHours || 0;
     const completed = facultyData[key].completedHours || 0;
-
     const leftInput = document.getElementById(`${key}_left`);
     if (leftInput) leftInput.value = allotted - completed;
 }
 
-// ✅ NEW FUNCTION
 function updateDate(key, value) {
     if (!facultyData[key]) facultyData[key] = {};
     facultyData[key].asOnDate = value;
 }
 
 function showSummary() {
-    const name = facultyName.value;
-    const email = facultyEmail.value;
-    const id = facultyId.value;
+    const name = document.getElementById('facultyName').value;
+    const email = document.getElementById('facultyEmail').value;
+    const id = document.getElementById('facultyId').value;
 
     if (!name || !email || !id) {
         alert('Please fill in all faculty information first.');
         return;
     }
 
-    let summaryHtml = `
-        <div class="faculty-summary">
-            <h3>Faculty: ${name} (${id})</h3>
-            <p>Email: ${email}</p>
-        </div>
-    `;
+    let summaryHtml = `<div class="faculty-summary"><h3>Faculty: ${name} (${id})</h3><p>Email: ${email}</p></div>`;
 
-    for (let sem = 1; sem <= 8; sem++) {
+    const checkKeys = [1, 2, 3, 4, 5, 6, 7, 8, 'MSC1', 'MSC2'];
+
+    checkKeys.forEach(sem => {
         const semesterSubjects = Object.keys(facultyData)
             .filter(k => k.startsWith(`sem${sem}_`) && facultyData[k].allocated)
             .map(k => {
@@ -134,19 +129,16 @@ function showSummary() {
                 return { ...subject, ...facultyData[k] };
             });
 
-        if (!semesterSubjects.length) continue;
+        if (!semesterSubjects.length) return;
+
+        let tableHeader = isNaN(sem) ? 
+            `M.Sc. ${sem.replace('MSC', '')}${sem.includes('1') ? 'st' : 'nd'} Year` : 
+            `Semester ${sem}`;
 
         summaryHtml += `
-            <h4>Semester ${sem}</h4>
+            <h4>${tableHeader}</h4>
             <table class="summary-table">
-                <tr>
-                    <th>Code</th>
-                    <th>Title</th>
-                    <th>Allotted</th>
-                    <th>Completed</th>
-                    <th>Remaining</th>
-                    <th>As on</th>
-                </tr>
+                <tr><th>Code</th><th>Title</th><th>Allotted</th><th>Completed</th><th>Remaining</th><th>As on</th></tr>
         `;
 
         semesterSubjects.forEach(s => {
@@ -161,36 +153,29 @@ function showSummary() {
                 </tr>
             `;
         });
-
         summaryHtml += '</table>';
-    }
+    });
 
-    summaryContent.innerHTML = summaryHtml;
+    const summarySection = document.getElementById('summarySection');
+    document.getElementById('summaryContent').innerHTML = summaryHtml;
     summarySection.style.display = 'block';
     summarySection.scrollIntoView({ behavior: 'smooth' });
 }
 
 function exportData() {
-    const name = facultyName.value;
-    const email = facultyEmail.value;
-    const id = facultyId.value;
-
     const payload = {
-        faculty: { name, email, id },
+        faculty: { 
+            name: document.getElementById('facultyName').value, 
+            email: document.getElementById('facultyEmail').value, 
+            id: document.getElementById('facultyId').value 
+        },
         subjects: facultyData,
         timestamp: new Date().toISOString()
     };
 
     const msg = `Faculty Data:\n${JSON.stringify(payload, null, 2)}`;
     const waUrl = `https://wa.me/919140878191?text=${encodeURIComponent(msg)}`;
-
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `faculty_${id}_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-
-    if (confirm('Send via WhatsApp?')) window.open(waUrl);
+    window.open(waUrl);
 }
 
 document.getElementById('facultyForm').addEventListener('submit', e => {
