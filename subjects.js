@@ -44,7 +44,14 @@ const subjectsData = {
         { code: "N-COMH(II) 401", title: "Community Health Nursing II", credits: 5, hours: 100 }
     ],
     8: [
-        { code: "INTE 415-435", title: "Internship (22 Weeks)", credits: 0, hours: 0 }
+        { code: "INTE 415", title: "Internship (22 Weeks)", credits: 0, hours: 0 }
+    ],
+    // New B.Sc. Fourth Year subjects
+    "BSC4": [
+        { code: "BSC401", title: "Midwifery and Obstetrical Nursing", credits: "-", hours: "-" },
+        { code: "BSC402", title: "Community Health Nursing-II", credits: "-", hours: "-" },
+        { code: "BSC403", title: "Nursing Research & Statistics", credits: "-", hours: "-" },
+        { code: "BSC404", title: "Management of Nursing Services and Education", credits: "-", hours: "-" }
     ],
     "MSC1": [
         { code: "MSC101", title: "Nursing Education", credits: "-", hours: "-" },

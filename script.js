@@ -1,22 +1,48 @@
 let currentSemester = 1;
 let facultyData = {};
 
+/**
+ * Handles the display of subjects based on the selected tab (Semester/Year).
+ * @param {string|number} semester - The identifier for the subjects to show.
+ */
 function showSemester(semester) {
     currentSemester = semester;
 
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (event) event.target.classList.add('active');
+    // 1. Update Tab Button UI
+    // We use a robust selector to find the active button even if the 'event' object is missing.
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const clickAttr = btn.getAttribute('onclick');
+        if (clickAttr && (clickAttr.includes(`'${semester}'`) || clickAttr.includes(`(${semester})`))) {
+            btn.classList.add('active');
+        }
+    });
 
     const content = document.getElementById('semesterContent');
+    
+    // Safety check: subjectsData must be defined in your separate subjects.js file
+    if (typeof subjectsData === 'undefined') {
+        content.innerHTML = "<p style='color:red; padding:20px;'>Error: subjectsData not found. Please ensure subjects.js is loaded.</p>";
+        return;
+    }
+
     const subjects = subjectsData[semester] || [];
 
-    // Format header based on type (Semester vs M.Sc.)
-    let headerLabel = isNaN(semester) ? 
-        `M.Sc. ${semester.replace('MSC', '')}${semester.includes('1') ? 'st' : 'nd'} Year` : 
-        `Semester ${semester}`;
+    // 2. Format Header Label for UI
+    let headerLabel = "";
+    if (semester === "BSC4") {
+        headerLabel = "B.Sc. 4th Year";
+    } else if (isNaN(semester)) {
+        headerLabel = `M.Sc. ${semester.replace('MSC', '')}${semester.includes('1') ? 'st' : 'nd'} Year`;
+    } else {
+        headerLabel = `Semester ${semester}`;
+    }
 
     let html = `<h3>${headerLabel} Subjects</h3><div class="subjects-grid">`;
+
+    if (subjects.length === 0) {
+        html += `<p style="padding: 20px; color: #666;">No subjects found for this selection.</p>`;
+    }
 
     subjects.forEach(subject => {
         const key = `sem${semester}_${subject.code}`;
@@ -57,14 +83,14 @@ function showSemester(semester) {
                     </div>
 
                     <div class="hours-group">
-                        <label>As on</label>
+                        <label>As on Date</label>
                         <input type="date"
                             value="${savedData.asOnDate}"
                             onchange="updateDate('${key}', this.value)">
                     </div>
 
                     <div class="hours-group">
-                        <label>Remaining Hours</label>
+                        <label>Remaining</label>
                         <input type="number"
                             id="${key}_left"
                             value="${savedData.allottedHours - savedData.completedHours}"
@@ -88,7 +114,8 @@ function toggleSubject(key, allocated) {
         };
     }
     facultyData[key].allocated = allocated;
-    document.getElementById(`${key}_inputs`).style.display = allocated ? 'block' : 'none';
+    const inputDiv = document.getElementById(`${key}_inputs`);
+    if (inputDiv) inputDiv.style.display = allocated ? 'block' : 'none';
 }
 
 function updateHours(key, type, value) {
@@ -111,14 +138,15 @@ function showSummary() {
     const email = document.getElementById('facultyEmail').value;
     const id = document.getElementById('facultyId').value;
 
-    if (!name || !email || !id) {
-        alert('Please fill in all faculty information first.');
+    if (!name || !id) {
+        alert('Please fill in Faculty Name and ID before previewing.');
         return;
     }
 
     let summaryHtml = `<div class="faculty-summary"><h3>Faculty: ${name} (${id})</h3><p>Email: ${email}</p></div>`;
 
-    const checkKeys = [1, 2, 3, 4, 5, 6, 7, 8, 'MSC1', 'MSC2'];
+    // Define all possible keys to check for summary
+    const checkKeys = [1, 2, 3, 4, 5, 6, 7, 8, 'BSC4', 'MSC1', 'MSC2'];
 
     checkKeys.forEach(sem => {
         const semesterSubjects = Object.keys(facultyData)
@@ -129,16 +157,19 @@ function showSummary() {
                 return { ...subject, ...facultyData[k] };
             });
 
-        if (!semesterSubjects.length) return;
+        if (semesterSubjects.length === 0) return;
 
-        let tableHeader = isNaN(sem) ? 
-            `M.Sc. ${sem.replace('MSC', '')}${sem.includes('1') ? 'st' : 'nd'} Year` : 
-            `Semester ${sem}`;
+        let label = (sem === 'BSC4') ? "B.Sc. 4th Year" : (isNaN(sem) ? `M.Sc. ${sem}` : `Semester ${sem}`);
 
         summaryHtml += `
-            <h4>${tableHeader}</h4>
-            <table class="summary-table">
-                <tr><th>Code</th><th>Title</th><th>Allotted</th><th>Completed</th><th>Remaining</th><th>As on</th></tr>
+            <h4>${label}</h4>
+            <table class="summary-table" border="1" style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #f2f2f2;">
+                        <th>Code</th><th>Title</th><th>Allotted</th><th>Completed</th><th>Remaining</th><th>As on</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
         semesterSubjects.forEach(s => {
@@ -146,14 +177,14 @@ function showSummary() {
                 <tr>
                     <td>${s.code}</td>
                     <td>${s.title}</td>
-                    <td>${s.allottedHours}</td>
-                    <td>${s.completedHours}</td>
-                    <td>${s.allottedHours - s.completedHours}</td>
-                    <td>${s.asOnDate}</td>
+                    <td align="center">${s.allottedHours}</td>
+                    <td align="center">${s.completedHours}</td>
+                    <td align="center">${s.allottedHours - s.completedHours}</td>
+                    <td align="center">${s.asOnDate}</td>
                 </tr>
             `;
         });
-        summaryHtml += '</table>';
+        summaryHtml += '</tbody></table>';
     });
 
     const summarySection = document.getElementById('summarySection');
@@ -163,24 +194,36 @@ function showSummary() {
 }
 
 function exportData() {
+    const name = document.getElementById('facultyName').value;
+    const id = document.getElementById('facultyId').value;
+
+    if (!name || !id) {
+        alert('Please fill in Faculty Name and ID.');
+        return;
+    }
+
     const payload = {
-        faculty: { 
-            name: document.getElementById('facultyName').value, 
-            email: document.getElementById('facultyEmail').value, 
-            id: document.getElementById('facultyId').value 
-        },
-        subjects: facultyData,
-        timestamp: new Date().toISOString()
+        faculty: { name, id, email: document.getElementById('facultyEmail').value },
+        data: facultyData,
+        submittedAt: new Date().toLocaleString()
     };
 
-    const msg = `Faculty Data:\n${JSON.stringify(payload, null, 2)}`;
+    const msg = `Faculty Report: ${name} (${id})\nData: ${JSON.stringify(payload, null, 2)}`;
     const waUrl = `https://wa.me/919140878191?text=${encodeURIComponent(msg)}`;
     window.open(waUrl);
 }
 
-document.getElementById('facultyForm').addEventListener('submit', e => {
-    e.preventDefault();
-    exportData();
+// Global initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial load for Semester 1
+    showSemester(1);
+    
+    // Form submission event
+    const form = document.getElementById('facultyForm');
+    if (form) {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            exportData();
+        });
+    }
 });
-
-document.addEventListener('DOMContentLoaded', () => showSemester(1));
