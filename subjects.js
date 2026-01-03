@@ -45,5 +45,17 @@ const subjectsData = {
     ],
     8: [
         { code: "INTE 415-435", title: "Internship (22 Weeks)", credits: 0, hours: 0 }
+    ],
+    "MSC1": [
+        { code: "MSC101", title: "Nursing Education", credits: "-", hours: "-" },
+        { code: "MSC102", title: "Advance Nursing Practice", credits: "-", hours: "-" },
+        { code: "MSC103", title: "Nursing Research and Statistics", credits: "-", hours: "-" },
+        { code: "MSC104", title: "Clinical Speciality - I: Child Health (Pediatric) Nursing", credits: "-", hours: "-" },
+        { code: "MSC105", title: "Clinical Speciality - I: Medical Surgical Nursing", credits: "-", hours: "-" }
+    ],
+    "MSC2": [
+        { code: "MSC201", title: "Nursing Management", credits: "-", hours: "-" },
+        { code: "MSC202", title: "Clinical Speciality - II: Child Health (Pediatric) Nursing", credits: "-", hours: "-" },
+        { code: "MSC203", title: "Clinical Speciality - II: Medical Surgical Nursing-Critical Care Nursing", credits: "-", hours: "-" }
     ]
 };
